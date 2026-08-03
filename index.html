@@ -1428,7 +1428,7 @@ function updateCapaWarnings(){
     if(!pm)return;
     pm.data.forEach((prod,i)=>{
       const util=(prod/pm.cap[i]);
-      if(util>=procCapaThresh)procWarn.push(`• ${pm.name} ${MO[i]}: ${(util*100).toFixed(1)}%`);
+      if(i>=7&&util>=procCapaThresh)procWarn.push(`• ${pm.name} ${MO[i]}: ${(util*100).toFixed(1)}%`);
     });
   });
   const procWarningEl=document.getElementById('procCapaWarning');
@@ -1455,7 +1455,7 @@ function updateSeriesWarnings(){
     if(!sm)return;
     sm.data.forEach((prod,i)=>{
       const util=(prod/dCapa.max[i]);
-      if(util>=seriesCapaThresh)serWarn.push(`• ${sm.name} ${MO[i]}: ${(util*100).toFixed(1)}%`);
+      if(i>=7&&util>=seriesCapaThresh)serWarn.push(`• ${sm.name} ${MO[i]}: ${(util*100).toFixed(1)}%`);
     });
   });
   const serWarningEl=document.getElementById('seriesCapaWarning');
