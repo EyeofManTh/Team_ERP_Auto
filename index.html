@@ -1326,7 +1326,7 @@ function buildProcComboData(proc, moFrom, moTo){
 
   // 월 범위 + 실적/예측 알파
   const mA = (i, hiB, loB) => {
-    const base = i < 6 ? hiB : loB;
+    const base = i < 7 ? hiB : loB;
     if(isFullRange) return base;
     return inRange(i) ? Math.min(1, hiB*1.06) : base*0.10;
   };
@@ -1618,7 +1618,7 @@ function buildComboData(proc, moFrom, moTo){
   // bar alpha: 범위 내 = 밝게, 범위 밖 = dim
   const inRange = i => i>=moFrom && i<=moTo;
   const bA = (i, hiB, loB) => {
-    const base = i < 6 ? hiB : loB;
+    const base = i < 7 ? hiB : loB;
     if(isFullRange) return base;
     return inRange(i) ? Math.min(1, hiB*1.06) : base*0.10;
   };
