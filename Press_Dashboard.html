@@ -415,11 +415,9 @@ function pMuse(){
     for(let m=0;m<12;m++){if(m>=LM){cells+=c_('');continue;}if(!has){cells+=c_('–','c');continue;}const v=mode==='ratio'?(o[m].ratio||0):o[m].u;cells+=c_(mode==='ratio'?fmt(v)+'%':fI(v/1e3),'',mode==='ratio'?bar(v,80):'');}
     return`<tr class="clk${cc===ALL?' tot':''}${cc===c?' sel':''}" data-cat="${cc}">${c_(NAME(cc),'k')}${cells}${c_(has?(mode==='ratio'?fmt(t.ratio||0)+'%':fI(t.u/1e3)):'–','','font-weight:700')}${c_(has?fI(t.u):'–')}${c_(fI(t.q))}</tr>`;}).join('');
   const ctl=segHTML('segMuseMode',[['ratio','비율 (%)'],['qty','수량 (천 EA)']],UI.museMode);
-  const top=MC.slice(0,15).map((r,i)=>`<tr>${c_(i+1,'c')}${c_(esc(r[0]),'l')}${c_(esc(r[1]),'l')}${c_(esc(r[2]),'c')}${c_(fI(r[3]))}${c_(fI(r[4]))}${c_(fmt(r[4]/r[3]*100)+'%','',bar(r[4]/r[3]*100,100))}${c_(esc(r[5]),'l')}</tr>`).join('');
   return pageHead('Press 종합 현황','무세정 현황',sub,chips)+
     xl({title:`▣ 제품군 × 월 · ${LY}년`,sub:mode==='ratio'?'무세정 비율 (무세정 양품 ÷ 양품, %)':'무세정 양품 수량 (천 EA)',ctl,head,rows,note:'범용(60톤 제외) 무세정 공정은 6월부터 도입돼 1~5월은 0으로 계산합니다. 무세정 대상이 아닌 제품군은 –로 표시합니다.'})+
-    `<h2 class="sech">${n} · 추이</h2><div class="grid2">${chartCard('chM',`월별 무세정 비율`,`${n} · 양품 수량 기준 · %`,'')}${chartCard('chQ','월별 무세정 수량','백만 EA · 제품군별 구성',legendSw([{name:'일관',color:'var(--c1)'},{name:'범용',color:'var(--c2)'}]))}</div>`+
-    xl({title:'▣ 무세정 주요 품목 TOP 15',sub:'무세정 수량 상위 코드',head:`<tr>${th('순위')}${th('코드')}${th('품명')}${th('제품군')}${th('양품 수량(EA)')}${th('무세정 수량(EA)')}${th('무세정 비중')}${th('비고')}</tr>`,rows:top,tall:true,cls:'st'});
+    `<h2 class="sech">${n} · 추이</h2><div class="grid2">${chartCard('chM',`월별 무세정 비율`,`${n} · 양품 수량 기준 · %`,'')}${chartCard('chQ','월별 무세정 수량','백만 EA · 제품군별 구성',legendSw([{name:'일관',color:'var(--c1)'},{name:'범용',color:'var(--c2)'}]))}</div>`
 }
 function dMuse(){
   const c=UI.cat,mon=Array.from({length:LM},(_,i)=>muse(i+1,i+1,c));
@@ -532,31 +530,6 @@ function dGTon(g){
   $('#tB').insertAdjacentHTML('beforeend',`<div class="legend" style="margin-top:6px">${legendSw(yrs.map(y=>({name:String(y),color:yc(y)})))}</div>`);
 }
 
-function pGCd(g){
-  const X=F[GN[g]];const codes=X.code.slice().sort((a,b)=>b.qty-a.qty);const flagged=codes.filter(r=>r.flag);const totQ=codes.reduce((a,r)=>a+r.qty,0),flQ=flagged.reduce((a,r)=>a+r.qty,0);
-  const top=codes[0];
-  const sub=`총 ${codes.length}개 코드 중 상위 15개가 수량의 <b>${fmt(codes.slice(0,15).reduce((a,r)=>a+r.qty,0)/totQ*100,0)}%</b>를 차지합니다. 1 cavity로 가정했지만 SPM이 높은 <b>캐비티 확인 후보 ${flagged.length}개</b>(수량 ${fmt(flQ/totQ*100)}%)는 노란색으로 표시했습니다.`;
-  const only=UI.cdOnly,topN=UI.cdTop;let list=only?flagged:codes;const shown=topN==='all'?list:list.slice(0,+topN);
-  const has24=codes.some(r=>r.q24!=null);
-  const body=shown.map((r,i)=>`<tr class="${r.flag?'flag':''}">${c_(codes.indexOf(r)+1,'c')}${c_(esc(r.code),'l')}${c_(esc(r.name),'l')}${c_(r.cav,'c')}${c_(fI(r.qty))}${c_(fmt(r.qr*100)+'%','',bar(r.qr*100,Math.max(8,codes[0].qr*100)))}${has24?c_(fI(r.q24||0)):''}${c_(fI(r.q25||0))}${c_(fI(r.q26||0))}${c_(fmt(r.spmS))}${c_(fmt(r.spmE))}${c_(r.flag?'<span class="badge">확인</span>':'','c')}</tr>`).join('');
-  const head=`<tr>${th('순위')}${th('코드')}${th('품명')}${th('CAVITY')}${th('양품수량 (EA)')}${th('수량 비율')}${has24?th('2024 수량'):''}${th('2025 수량')}${th('2026 수량')}${th('SPM (Stroke)')}${th('SPM (EA)')}${th('캐비티 확인')}</tr>`;
-  const ctl=segHTML('segCdTop',[['15','TOP 15'],['30','TOP 30'],['all','전체']],UI.cdTop)+segHTML('segCdOnly',[['0','전체 코드'],['1','확인 후보만']],UI.cdOnly);
-  const chips=kchip('전체 코드',codes.length+'개')+kchip('1위',esc(top.code.replace('-SP1','')),`<span class="dl nt">${fmt(top.qr*100)}%</span>`)+kchip('캐비티 확인 후보',flagged.length+'개');
-  const cand=flagged.slice(0,6).map(r=>`<tr>${c_('<b>'+esc(r.code.replace('-SP1',''))+'</b><br><small style="color:var(--tx3)">'+esc(r.name)+'</small>','l')}${c_(fI(r.qty))}${c_(fmt(r.spmS))}</tr>`).join('');
-  return pageHead(GL[g]+' 분석','코드별 TOP',sub,chips)+
-    xl({title:esc(X.title_code),sub:`수량 기준 ${only?'확인 후보':'상위'} ${shown.length}개 표시`,ctl,head,rows:body,tall:true,cls:'st',note:'CAVITY는 다 Cavity List Rev 2 기준이며 목록에 없는 코드는 1입니다. 노란색은 1 cavity로 가정한 코드 중 SPM이 높아 캐비티 확인이 필요한 후보입니다.'})+
-    `<h2 class="sech">코드별 생산 추이</h2><div class="grid2 w">${chartCard('cA','상위 10개 코드 · 연도별 생산 수량','백만 EA · 연도 구성',legendSw(['2024','2025','2026'].filter(y=>y!=='2024'||has24).map(y=>({name:y,color:yc(+y)}))))}
-    <div class="card"><div class="card-h"><div><h3>캐비티 확인 후보</h3><div class="sub">1 cavity 가정 · SPM 높음</div></div></div>
-      <div style="font:600 34px var(--f-d);letter-spacing:-.02em">${flagged.length}<small style="font:500 14px var(--f-b);color:var(--tx3);margin-left:6px">개 코드 · 수량 ${fmt(flQ/totQ*100)}%</small></div>
-      <div class="xl-w" style="margin-top:10px"><table class="x"><thead><tr>${th('코드 · 품명')}${th('수량 (EA)')}${th('SPM')}</tr></thead><tbody>${cand||'<tr><td class="c" colspan="3">후보 없음</td></tr>'}</tbody></table></div>
-      <div class="hint" style="margin-top:8px">다 Cavity List에 추가해야 할 코드가 있는지 확인이 필요합니다.</div></div></div>`;
-}
-function dGCd(g){
-  const X=F[GN[g]];const codes=X.code.slice().sort((a,b)=>b.qty-a.qty).slice(0,10);const has24=X.code.some(r=>r.q24!=null);
-  hStack($('#cA'),{rows:codes.map(r=>({label:r.code.replace('-SP1','').replace('GH6','6'),segs:[...(has24?[{v:(r.q24||0)/1e6,color:yc(2024),n:'2024'}]:[]),{v:(r.q25||0)/1e6,color:yc(2025),n:'2025'},{v:(r.q26||0)/1e6,color:yc(2026),n:'2026'}].map(s=>({...s,tip:[{color:'transparent',value:r.name,label:r.model}]}))})),pct:false,unit:'M',dec:1,labelW:96,rowH:34,showTot:true,fmtTot:v=>fmt(v,1)+'M'});
-}
-
-/* ═════════ INFO ═════════ */
 function pInfo(){
   const B=[['모수','법인 ERP Press 양품 실적(2023~'+LY+'.'+String(LM).padStart(2,'0')+'). Press Charge · Press auto charge, Assy No GH61/63/64/98 + -SP1 기준이며 DECO는 3개 품목만 포함합니다.'],
     ['SPM (Stroke/분)','Σ(양품 ÷ Cavity) ÷ 가동시간(분). ST(초/Stroke) = 60 ÷ SPM. 불량은 수량에서 빼고 가동시간은 반영합니다. SPM 600 초과 또는 5 미만 13건은 제외했습니다.'],
@@ -582,8 +555,8 @@ const IC={
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>'};
 const NAV=[
   {g:'Press 종합 현황',items:[['sum','월간 요약','grid',pSum,dSum],['spm','SPM · ST','gauge',pSpm,dSpm],['muse','무세정','drop',pMuse,dMuse],['cav','Cavity 비율','layers',pCav,dCav]]},
-  {g:'일관 Press 분석',items:[['i-yr','연도별 요약','cal',()=>pGYr('i'),()=>dGYr('i')],['i-mo','월별 추이','trend',()=>pGMon('i'),()=>dGMon('i')],['i-tn','설비 톤수별','press',()=>pGTon('i'),()=>dGTon('i')],['i-cd','코드별 TOP','list',()=>pGCd('i'),()=>dGCd('i')]]},
-  {g:'INNER WALL 분석',items:[['w-yr','연도별 요약','cal',()=>pGYr('w'),()=>dGYr('w')],['w-mo','월별 추이','trend',()=>pGMon('w'),()=>dGMon('w')],['w-tn','설비 톤수별','press',()=>pGTon('w'),()=>dGTon('w')],['w-cd','코드별 TOP','list',()=>pGCd('w'),()=>dGCd('w')]]}];
+  {g:'일관 Press 분석',items:[['i-yr','연도별 요약','cal',()=>pGYr('i'),()=>dGYr('i')],['i-mo','월별 추이','trend',()=>pGMon('i'),()=>dGMon('i')],['i-tn','설비 톤수별','press',()=>pGTon('i'),()=>dGTon('i')]]},
+  {g:'INNER WALL 분석',items:[['w-yr','연도별 요약','cal',()=>pGYr('w'),()=>dGYr('w')],['w-mo','월별 추이','trend',()=>pGMon('w'),()=>dGMon('w')],['w-tn','설비 톤수별','press',()=>pGTon('w'),()=>dGTon('w')]]}];
 const PAGES={};NAV.forEach(g=>g.items.forEach(([id,t,ic,p,d])=>PAGES[id]={p,d}));PAGES.info={p:pInfo,d:()=>{}};
 function buildNav(){$('#nav').innerHTML=NAV.map(g=>`<div class="ng">${g.g}</div>`+g.items.map(([id,t,ic])=>`<a class="nv" href="#${id}" data-v="${id}"><svg viewBox="0 0 24 24">${IC[ic]}</svg>${t}</a>`).join('')).join('')+`<div class="ng">공통</div><a class="nv" href="#info" data-v="info"><svg viewBox="0 0 24 24">${IC.info}</svg>집계 기준</a>`;}
 let cur='sum';
@@ -594,8 +567,6 @@ function bind(){
   const seg=(id,key,num)=>{P.querySelectorAll(`#${id} button`).forEach(b=>b.addEventListener('click',()=>{UI[key]=num?+b.dataset.v:b.dataset.v;render(true);}));};
   seg('segMetric','metric');seg('segSpmYear','spmYear',1);seg('segSpmMode','spmMode');seg('segMuseMode','museMode');seg('segCavYear','cavYear',1);seg('segCavMode','cavMode');seg('segGMonYear','gMonYear');
   P.querySelectorAll('#segGMonYear button').forEach(b=>b.addEventListener('click',()=>{UI.gMonYear=b.dataset.v==='all'?'all':+b.dataset.v;render(true);},{once:false}));
-  P.querySelectorAll('#segCdTop button').forEach(b=>b.addEventListener('click',()=>{UI.cdTop=b.dataset.v;render(true);}));
-  P.querySelectorAll('#segCdOnly button').forEach(b=>b.addEventListener('click',()=>{UI.cdOnly=+b.dataset.v;render(true);}));
 }
 function route(){const id=(location.hash||'#sum').slice(1);cur=PAGES[id]?id:'sum';
   document.querySelectorAll('.nv').forEach(a=>{if(a.dataset.v===cur)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
