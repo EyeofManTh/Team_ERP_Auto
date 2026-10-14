@@ -108,6 +108,10 @@ table.x tbody tr:last-child td{border-bottom:0}
 .xl+.grid3{margin-top:16px}
 table.x.cmp td{padding:6px 8px}
 table.x td.hl{background-color:#E3F4F0!important;text-align:center}
+table.x th.rb{border-top:1px solid #D32F2F;border-left:1px solid #D32F2F;border-right:1px solid #D32F2F}
+table.x td.rb{border-left:1px solid #D32F2F;border-right:1px solid #D32F2F}
+table.x tbody tr:last-child td.rb{border-bottom:1px solid #D32F2F}
+table.x td.rb .dl{font-weight:700}
 .mu{font:700 17px var(--f-d);color:#0B6F63}
 table.x th small{font-weight:500;color:var(--tx3);font-size:12px}
 .card{min-width:0;padding:18px 20px;border-radius:14px;border:1px solid var(--line);background:var(--card);box-shadow:0 1px 2px rgba(15,27,51,.04)}
@@ -350,9 +354,9 @@ function pSum(){
   const sub=`${LY}.01–${mm} 누계 · ${PY} 동기 대비 <b>분당 생산능력 ${sgn(K.dEa)}</b> · <b>다 cavity 비중 ${sgn(dpp(K.cav,K.cavP),1,'%p')}</b> · <b>무세정 점유율 ${fmt(K.mu.ratio)}%</b>`;
   const ar=(a,b,u='')=>`${fmt(a)}${u} → <b>${fmt(b)}${u}</b>`;
   const head=`<tr>${th('제품군','rowspan="2"')}${th('분당 생산능력 (전년 동기 대비)','colspan="5"')}${th('다 cavity 비중','colspan="2"')}${th('무세정<br>점유율','rowspan="2"')}</tr>
-    <tr>${th(`가동속도(SPM) (Stroke)<br><small>${PY} → ${LY}</small>`)}${th('증감')}${th(`가동속도(SPM) (EA)<br><small>${PY} → ${LY}</small>`)}${th('증감')}${th('다 cavity 효과')}${th(`비중<br><small>${PY} → ${LY}</small>`)}${th('증감')}</tr>`;
+    <tr>${th(`가동속도(SPM) (Stroke)<br><small>${PY} → ${LY}</small>`)}${th('증감')}${th(`가동속도(SPM) (EA)<br><small>${PY} → ${LY}</small>`)}${th('증감','class="rb"')}${th('다 cavity 효과')}${th(`비중<br><small>${PY} → ${LY}</small>`)}${th('증감','class="rb"')}</tr>`;
   const rows=[ALL,...SHOW].map(cc=>{const o=K.by[cc],e=effOf(cc),v=e?e.cav/e.ea5*100:null,dc=dpp(o.cav,o.cavP);
-    return`<tr class="clk${cc===ALL?' tot':''}${cc===c?' sel':''}" data-cat="${cc}">${c_(NAME(cc),'k')}${c_(ar(o.spmP,o.spm))}${c_(dcell(o.dSpm,sgn(o.dSpm),o.dSpm>0))}${c_(ar(o.eaP,o.ea),'','font-weight:700')}${c_(dcell(o.dEa,sgn(o.dEa),o.dEa>0),'','font-weight:700;font-size:15.5px')}${c_(v==null?'–':dcell(v,sgn(v,1,'%p'),true))}${c_(ar(o.cavP,o.cav,'%'))}${c_(dcell(dc,sgn(dc,1,'%p'),true))}${c_(o.mu?`<span class="mu">${fmt(o.mu)}%</span>`:'–','hl')}</tr>`;}).join('');
+    return`<tr class="clk${cc===ALL?' tot':''}${cc===c?' sel':''}" data-cat="${cc}">${c_(NAME(cc),'k')}${c_(ar(o.spmP,o.spm))}${c_(dcell(o.dSpm,sgn(o.dSpm),o.dSpm>0))}${c_(ar(o.eaP,o.ea),'','font-weight:700')}${c_(dcell(o.dEa,sgn(o.dEa),o.dEa>0),'rb','font-weight:700;font-size:15.5px')}${c_(v==null?'–':dcell(v,sgn(v,1,'%p'),true))}${c_(ar(o.cavP,o.cav,'%'))}${c_(dcell(dc,sgn(dc,1,'%p'),true),'rb','font-weight:700')}${c_(o.mu?`<span class="mu">${fmt(o.mu)}%</span>`:'–','hl')}</tr>`;}).join('');
   const lg=legendHTML([{name:String(PY),color:yc(PY)},{name:String(LY),color:yc(LY)}]);
   const dE=K.by[c].dEa,dC=dpp(K.by[c].cav,K.by[c].cavP),mr=muse(1,LM,c).ratio;
   return pageHead('Press 종합 현황','월간 Press 생산성 요약',sub)+
