@@ -104,6 +104,12 @@ table.x tbody tr:last-child td{border-bottom:0}
 /* charts */
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 .grid2.w{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.xl+.grid3{margin-top:16px}
+table.x.cmp td{padding:6px 8px}
+table.x td.hl{background-color:#E3F4F0!important;text-align:center}
+.mu{font:700 17px var(--f-d);color:#0B6F63}
+table.x th small{font-weight:500;color:var(--tx3);font-size:12px}
 .card{min-width:0;padding:18px 20px;border-radius:14px;border:1px solid var(--line);background:var(--card);box-shadow:0 1px 2px rgba(15,27,51,.04)}
 .card-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
 .card-h h3{margin:0;font:700 15.5px/1.35 var(--f-d)}
@@ -132,7 +138,7 @@ table.x tbody tr:last-child td{border-bottom:0}
 #tip .tr b{color:var(--tx);font:600 14px var(--f-d);min-width:54px}
 .empty{padding:28px;text-align:center;color:var(--tx3)}
 
-@media (max-width:1100px){.grid2,.grid2.w{grid-template-columns:1fr}}
+@media (max-width:1100px){.grid2,.grid2.w,.grid3{grid-template-columns:1fr}}
 @media (max-width:960px){
   .app{grid-template-columns:1fr}.mtop{display:flex}
   .side{position:fixed;z-index:50;left:0;top:0;bottom:0;width:284px;transform:translateX(-102%);transition:transform .22s ease;box-shadow:16px 0 40px rgba(0,0,0,.35)}
@@ -218,8 +224,8 @@ const hideTip=()=>{tip.hidden=true;};
 
 /* ── generic line chart (n points) ── */
 let hoverIdx=null;
-function lineChart(host,{labels,series,dec=1,unit='',aria,extra,floor0}){host.textContent='';
-  const n=labels.length,w=Math.max(280,host.clientWidth),h=w<520?270:320,m={l:48,r:62,t:16,b:30};
+function lineChart(host,{labels,series,dec=1,unit='',aria,extra,floor0,height}){host.textContent='';
+  const n=labels.length,w=Math.max(280,host.clientWidth),h=height||(w<520?270:320),m={l:48,r:62,t:16,b:30};
   const vals=series.flatMap(s=>s.vals).filter(v=>v!=null);if(!vals.length){host.innerHTML='<div class="empty">데이터 없음</div>';return;}
   const mn=Math.min(...vals),mx=Math.max(...vals),pad=(mx-mn||1)*.12;const sc=nice(floor0&&mn>=0?Math.max(0,mn-pad):mn-pad,mx+pad,4);
   const X=i=>m.l+(n>1?i*(w-m.l-m.r)/(n-1):0),Y=v=>m.t+(sc.hi-v)/(sc.hi-sc.lo)*(h-m.t-m.b);
@@ -340,37 +346,25 @@ function computeKeys(){
 
 /* ═════════ PAGE: 월간 요약 ═════════ */
 function pSum(){
-  const c=UI.cat,n=NAME(c),EF=effAll();
-  const sub=`${LY}.01–${String(LM).padStart(2,'0')} 누계를 ${PY} 같은 기간과 비교했습니다. 전체 <b>SPM(Stroke) ${sgn(K.dSpm)}</b>, <b>SPM(EA) ${sgn(K.dEa)}</b>. 다 cavity 비중이 ${fmt(K.cavP)}%에서 ${fmt(K.cav)}%로 늘어, 일부 제품군은 Stroke 기준 SPM이 낮아도 실제 생산속도(EA)는 올랐습니다. 다 cavity 효과는 <b>${sgn(EF.cav/EF.ea5*100,1,'%p')}</b>(가동시간 약 ${fI(EF.hrs)}시간 절감 추정)입니다.`;
-  const chips=kchip('SPM (Stroke/분)',fmt(K.spm),dcell(K.dSpm,sgn(K.dSpm),K.dSpm>0))+kchip('SPM (EA/분)',fmt(K.ea),dcell(K.dEa,sgn(K.dEa),K.dEa>0))+kchip('다 cavity 비중',fmt(K.cav)+'%',dcell(dpp(K.cav,K.cavP),sgn(dpp(K.cav,K.cavP),1,'%p'),true))+kchip('무세정 비율',fmt(K.mu.ratio)+'%')+kchip('다 cavity 가동시간 절감 (추정)',fI(EF.hrs)+'시간');
-  const head=`<tr>${th('제품군','rowspan="2"')}${th('SPM (Stroke/분)','colspan="3"')}${th('SPM (EA/분)','colspan="3"')}${th('다 cavity 비중','colspan="3"')}${th('무세정','rowspan="2"')}${th(`${LM}월 SPM (Stroke)`,'colspan="2"')}</tr>
-    <tr>${th(PY+' 동기')}${th(LY+' 동기')}${th('증감')}${th(PY+' 동기')}${th(LY+' 동기')}${th('증감')}${th(PY+' 동기')}${th(LY+' 동기')}${th('증감')}${th('값')}${th('전월 대비')}</tr>`;
-  const rows=[ALL,...SHOW].map(cc=>{const o=K.by[cc];return`<tr class="clk${cc===ALL?' tot':''}${cc===c?' sel':''}" data-cat="${cc}">${c_(NAME(cc),'k')}${c_(fmt(o.spmP))}${c_(fmt(o.spm))}${c_(dcell(o.dSpm,sgn(o.dSpm),o.dSpm>0))}${c_(fmt(o.eaP))}${c_(fmt(o.ea))}${c_(dcell(o.dEa,sgn(o.dEa),o.dEa>0))}${c_(fmt(o.cavP)+'%')}${c_(fmt(o.cav)+'%')}${c_(dcell(dpp(o.cav,o.cavP),sgn(dpp(o.cav,o.cavP),1,'%p'),true))}${c_(o.mu?fmt(o.mu)+'%':'–')}${c_(fmt(o.lm))}${c_(dcell(yoy(o.lm,o.pm),sgn(yoy(o.lm,o.pm)),yoy(o.lm,o.pm)>0))}</tr>`;}).join('');
-  return pageHead('Press 종합 현황','월간 Press 생산성 요약',sub,chips)+
-    xl({title:'▣ 제품군별 개선 현황',sub:`${LY}.01–${String(LM).padStart(2,'0')} 누계 vs ${PY} 동기 · 행을 클릭하면 아래 그래프가 바뀝니다`,head,rows,note:'증감: ▲ 초록 = 개선, ▼ 빨강 = 하락. 다 cavity 증감은 %p.'})+
-    effTable()+
-    `<h2 class="sech">${n} · 월별 추이</h2><div class="grid2">${chartCard('chS',`SPM (Stroke/분)`,'Stroke 기준 · 연도 비교',legendHTML([{name:String(PY),color:yc(PY)},{name:String(LY),color:yc(LY)}]))}${chartCard('chE',`SPM (EA/분)`,'실제 생산 속도 · 연도 비교',legendHTML([{name:String(PY),color:yc(PY)},{name:String(LY),color:yc(LY)}]))}</div>
-    <div class="grid2" style="margin-top:16px">${chartCard('chC','다 cavity 비중 · 무세정 비율',`${LY}년 월별 · %`,legendHTML([{name:'다 cavity 비중',color:'var(--c1)'},{name:'무세정 비율',color:'var(--c3)'}]))}${chartCard('chX','제품군별 전년 동기 대비','SPM(Stroke)과 SPM(EA) 증감 · %',legendSw([{name:'SPM (Stroke)',color:'var(--c1)'},{name:'SPM (EA)',color:'var(--c2)'}]))}</div>`+effCharts();
+  const c=UI.cat,n=NAME(c),mm=String(LM).padStart(2,'0');
+  const sub=`${LY}.01–${mm} 누계 · ${PY} 동기 대비 <b>분당 생산성 ${sgn(K.dEa)}</b> · <b>다 cavity 비중 ${sgn(dpp(K.cav,K.cavP),1,'%p')}</b> · <b>무세정 점유율 ${fmt(K.mu.ratio)}%</b>`;
+  const ar=(a,b,u='')=>`${fmt(a)}${u} → <b>${fmt(b)}${u}</b>`;
+  const head=`<tr>${th('제품군','rowspan="2"')}${th('분당 생산성 (전년 동기 대비)','colspan="5"')}${th('다 cavity 비중','colspan="2"')}${th('무세정<br>점유율','rowspan="2"')}</tr>
+    <tr>${th(`SPM (Stroke)<br><small>${PY} → ${LY}</small>`)}${th('증감')}${th(`SPM (EA)<br><small>${PY} → ${LY}</small>`)}${th('증감')}${th('다 cavity 효과')}${th(`비중<br><small>${PY} → ${LY}</small>`)}${th('증감')}</tr>`;
+  const rows=[ALL,...SHOW].map(cc=>{const o=K.by[cc],e=effOf(cc),v=e?e.cav/e.ea5*100:null,dc=dpp(o.cav,o.cavP);
+    return`<tr class="clk${cc===ALL?' tot':''}${cc===c?' sel':''}" data-cat="${cc}">${c_(NAME(cc),'k')}${c_(ar(o.spmP,o.spm))}${c_(dcell(o.dSpm,sgn(o.dSpm),o.dSpm>0))}${c_(ar(o.eaP,o.ea),'','font-weight:700')}${c_(dcell(o.dEa,sgn(o.dEa),o.dEa>0),'','font-weight:700;font-size:15.5px')}${c_(v==null?'–':dcell(v,sgn(v,1,'%p'),true))}${c_(ar(o.cavP,o.cav,'%'))}${c_(dcell(dc,sgn(dc,1,'%p'),true))}${c_(o.mu?`<span class="mu">${fmt(o.mu)}%</span>`:'–','hl')}</tr>`;}).join('');
+  const lg=legendHTML([{name:String(PY),color:yc(PY)},{name:String(LY),color:yc(LY)}]);
+  const dE=K.by[c].dEa,dC=dpp(K.by[c].cav,K.by[c].cavP),mr=muse(1,LM,c).ratio;
+  return pageHead('Press 종합 현황','월간 Press 생산성 요약',sub)+
+    xl({title:'▣ 제품군별 분당 생산성 향상',sub:`${LY}.01–${mm} 누계 vs ${PY} 동기 · 행을 클릭하면 아래 그래프가 바뀝니다`,head,rows,cls:'cmp',note:`증감: ▲ 초록 = 개선, ▼ 빨강 = 하락. 다 cavity 효과 = 분당 생산성(EA) 증가 중 다 cavity 적용으로 늘어난 몫(%p). 무세정은 ${LY}년 도입분이라 전년 비교가 없습니다.`})+
+    `<div class="grid3">${chartCard('chE','분당 생산성 (SPM EA/분)',`${n} · ${PY} 동기 대비 ${sgn(dE)}`,lg)}${chartCard('chV','다 cavity 비중',`${n} · ${PY} 동기 대비 ${sgn(dC,1,'%p')}`,lg)}${chartCard('chM','무세정 점유율',`${n} · ${LY}년 누계 ${mr==null?'–':fmt(mr)+'%'}`,'')}</div>`;
 }
 function dSum(){
-  const c=UI.cat;dEffCharts();
-  const yr=(f,y)=>({name:String(y),color:yc(y),vals:monthly(y,f,c)});
-  lineChart($('#chS'),{labels:MO,series:[yr(vSPM,PY),yr(vSPM,LY)],dec:1,aria:'월별 SPM(Stroke)',extra:i=>{const a=monthly(LY,vSPM,c)[i],b=monthly(PY,vSPM,c)[i],d=yoy(a,b);return d==null?[]:[{color:'transparent',value:sgn(d),label:'전년 동월 대비'}];}});
-  lineChart($('#chE'),{labels:MO,series:[yr(vEA,PY),yr(vEA,LY)],dec:1,aria:'월별 SPM(EA)',extra:i=>{const a=monthly(LY,vEA,c)[i],b=monthly(PY,vEA,c)[i],d=yoy(a,b);return d==null?[]:[{color:'transparent',value:sgn(d),label:'전년 동월 대비'}];}});
-  const cv=cavM(LY,c).slice(0,LM),mu=Array.from({length:LM},(_,i)=>muse(i+1,i+1,c).ratio);
-  lineChart($('#chC'),{labels:MO.slice(0,LM),series:[{name:'다 cavity 비중',color:'var(--c1)',vals:cv},{name:'무세정 비율',color:'var(--c3)',vals:mu}],dec:1,unit:'%',floor0:true,aria:'다cavity와 무세정'});
-  // YoY compare bars (all groups)
-  const host=$('#chX');host.textContent='';const rows=[ALL,...SHOW],w=Math.max(280,host.clientWidth),rowH=50,h=rows.length*rowH+12,lab=w<420?60:92,pr=54,pl=lab+6;
-  const data=rows.map(cc=>({cc,a:K.by[cc].dSpm,b:K.by[cc].dEa,va:K.by[cc].spm,vb:K.by[cc].ea,pa:K.by[cc].spmP,pb:K.by[cc].eaP}));
-  const vs=data.flatMap(r=>[r.a||0,r.b||0]);const hi=Math.max(...vs,1),lo=Math.min(...vs,-1),sc=(w-pl-pr)/(hi-lo),x0=pl-lo*sc,bh=16;
-  const svg=el('svg',{viewBox:`0 0 ${w} ${h}`,height:h,role:'img','aria-label':'제품군별 전년 동기 대비'},host);el('line',{x1:x0,x2:x0,y1:0,y2:h-6,style:'stroke:var(--line-2);stroke-width:1'},svg);
-  const short=cc=>({3:'INNER',2:'REAR',4:'BRKT'}[cc]||NAME(cc));
-  data.forEach((r,i)=>{const y=i*rowH+6;if(r.cc===ALL)el('line',{x1:0,x2:w,y1:y+rowH-2,y2:y+rowH-2,style:'stroke:var(--line);stroke-width:1'},svg);
-    tx(svg,0,y+rowH/2+5,w<420?short(r.cc):NAME(r.cc),r.cc===ALL?'vl':'tk2');
-    [[r.a,'var(--c1)','SPM (Stroke/분)',r.va,r.pa,y+4],[r.b,'var(--c2)','SPM (EA/분)',r.vb,r.pb,y+4+bh+3]].forEach(([v,col,nm,cv2,pv,yy])=>{if(v==null)return;const len=v*sc;
-      const b=hbar(svg,x0,yy,len,bh-2,4,col,{style:`fill:${col};transition:opacity .15s`});tx(svg,len>=0?x0+len+7:x0+len-7,yy+bh/2+3.5,sgn(v),'vl2',len>=0?'start':'end');
-      const hit=el('rect',{x:Math.min(x0,x0+len)-6,y:yy-1,width:Math.abs(len)+52,height:bh,style:'fill:transparent'},svg);
-      hit.addEventListener('pointermove',e=>{b.style.opacity=.8;showTip(e.clientX,e.clientY,`${NAME(r.cc)} · ${nm}`,[{color:col,value:fmt(cv2),label:`${LY} 동기`},{color:col,value:fmt(pv),label:`${PY} 동기`},{color:'transparent',value:sgn(v),label:'증감'}]);});hit.addEventListener('pointerleave',()=>{b.style.opacity=1;hideTip();});});});
+  const c=UI.cat,H=215;
+  lineChart($('#chE'),{height:H,labels:MO,series:[PY,LY].map(y=>({name:String(y),color:yc(y),vals:monthly(y,vEA,c)})),dec:1,aria:'월별 분당 생산성',extra:i=>{const d=yoy(monthly(LY,vEA,c)[i],monthly(PY,vEA,c)[i]);return d==null?[]:[{color:'transparent',value:sgn(d),label:'전년 동월 대비'}];}});
+  lineChart($('#chV'),{height:H,labels:MO,series:[PY,LY].map(y=>({name:String(y),color:yc(y),vals:cavM(y,c)})),dec:1,unit:'%',floor0:true,aria:'월별 다cavity 비중',extra:i=>{const d=dpp(cavM(LY,c)[i],cavM(PY,c)[i]);return d==null?[]:[{color:'transparent',value:sgn(d,1,'%p'),label:'전년 동월 대비'}];}});
+  const mu=Array.from({length:LM},(_,i)=>muse(i+1,i+1,c).ratio);
+  lineChart($('#chM'),{height:H,labels:MO.slice(0,LM),series:[{name:'무세정 점유율',color:'var(--c3)',vals:mu}],dec:1,unit:'%',floor0:true,aria:'월별 무세정 점유율'});
 }
 
 /* ═════════ PAGE: SPM · ST ═════════ */
@@ -464,25 +458,6 @@ function effAll(){const T6=S(LY,1,LM,ALL),T5=S(PY,1,LM,ALL);
   SHOW.forEach(c=>{const g=effG(c);if(!g)return;const w=g.a.t/T6.t;speed+=w*g.speed;cav+=w*g.cav;hrs+=g.hrs;});
   return{a:T6,b:T5,spm6,spm5,ea6,ea5,ec6,ec5,spmR:spm6/spm5,cavR:ec6/ec5,speed,cav,mix:(ea6-ea5)-speed-cav,hrs,sh6:cavO(LY,1,LM,ALL).share,sh5:cavO(PY,1,LM,ALL).share};}
 const effOf=c=>c===ALL?effAll():effG(c);
-/* monthly cavity effect in hours: time × (this month's avg cavity ÷ prior-year same-period avg cavity − 1) */
-function effMonthly(c){const cs=c===ALL?SHOW:[c];const out=Array(LM).fill(0);
-  cs.forEach(g=>{const e=effG(g);if(!e)return;for(let m=1;m<=LM;m++){const o=S(LY,m,m,g);if(o.t&&o.s)out[m-1]+=o.t*((o.q/o.s)/e.ec5-1)/60;}});return out;}
-function effTable(){
-  const c=UI.cat;
-  const head=`<tr>${th('제품군','rowspan="2"')}${th('다 cavity 비중','rowspan="2"')}${th('평균 cavity (EA/Stroke)','rowspan="2"')}${th('SPM (Stroke)','rowspan="2"')}${th('SPM (EA/분)','colspan="3"')}${th('증감 내역 (%p)','colspan="3"')}${th('가동시간 절감 (시간)','rowspan="2"')}</tr>
-    <tr>${th(PY+' 동기')}${th(LY+' 동기')}${th('증감')}${th('Stroke 속도')}${th('다 cavity')}${th('제품 믹스')}</tr>`;
-  const rows=[ALL,...SHOW].map(cc=>{const e=effOf(cc);const pp=(v)=>dcell(v,sgn(v,1,''),true);
-    if(!e)return`<tr class="clk${cc===c?' sel':''}" data-cat="${cc}">${c_(NAME(cc),'k')}${'<td>–</td>'.repeat(10)}</tr>`;
-    return`<tr class="clk${cc===ALL?' tot':''}${cc===c?' sel':''}" data-cat="${cc}">${c_(NAME(cc),'k')}${c_(fmt(e.sh5)+'% → <b>'+fmt(e.sh6)+'%</b>')}${c_(e.ec5.toFixed(2)+' → <b>'+e.ec6.toFixed(2)+'</b>')}${c_(dcell(yoy(e.spm6,e.spm5),sgn(yoy(e.spm6,e.spm5)),yoy(e.spm6,e.spm5)>0))}${c_(fmt(e.ea5))}${c_(fmt(e.ea6))}${c_(dcell(yoy(e.ea6,e.ea5),sgn(yoy(e.ea6,e.ea5)),yoy(e.ea6,e.ea5)>0))}${c_(pp(e.speed/e.ea5*100))}${c_('<b>'+pp(e.cav/e.ea5*100)+'</b>')}${c_(cc===ALL?pp(e.mix/e.ea5*100):'–')}${c_(fI(e.hrs),'','font-weight:700')}</tr>`;}).join('');
-  return xl({title:'▣ 다 cavity 효과 · 생산성 향상 분해',sub:`SPM(EA/분) 전년 동기 대비 증감을 ‘Stroke 속도’와 ‘다 cavity’로 나눈 표 · 행을 클릭하면 아래 그래프가 바뀝니다`,head,rows,note:'SPM(EA/분) = SPM(Stroke) × 평균 cavity. 증감 내역(%p) = 전년 동기 SPM(EA) 대비 기여도이며, Stroke 속도 + 다 cavity (+ 전체의 제품 믹스) = EA 증감입니다. 가동시간 절감은 다 cavity 효과를 시간으로 환산한 추정치로, 올해 생산량을 전년 동기 평균 cavity로 만들었다면 더 걸렸을 시간이며 전체는 제품군 합계입니다. 전체 행의 SPM 증감은 제품 믹스를 포함한 값이라 Stroke 속도 기여와 다를 수 있습니다.'});
-}
-function effCharts(){const n=NAME(UI.cat);
-  return `<h2 class="sech">${n} · 다 cavity 효과 추이</h2><div class="grid2">${chartCard('chEc','월별 평균 cavity (Stroke당 생산 개수)',`${n} · EA ÷ Stroke`,legendHTML(YEARS.map(yy=>({name:String(yy),color:yc(yy)}))))}${chartCard('chHr',`${LY}년 누적 가동시간 절감 (추정)`,`${n} · 시간 · 전년 동기 평균 cavity 대비`,'')}</div>`;}
-function dEffCharts(){const c=UI.cat;
-  lineChart($('#chEc'),{labels:MO,series:YEARS.map(yy=>({name:String(yy),color:yc(yy),vals:monthly(yy,o=>o.s?o.q/o.s:null,c)})),dec:2,aria:'월별 평균 cavity'});
-  const mh=effMonthly(c);let cu=0;const cm=mh.map(v=>(cu+=v));
-  lineChart($('#chHr'),{labels:MO.slice(0,LM),series:[{name:'누적 절감 시간',color:'var(--c3)',vals:cm}],dec:0,aria:'누적 가동시간 절감',extra:i=>[{color:'transparent',value:fI(mh[i])+'시간',label:'해당 월 절감'}]});}
-
 /* ═════════ GROUP PAGES (일관 / INNER WALL, from 자료 활용 files) ═════════ */
 const GN={i:'일관',w:'INNER WALL'},GL={i:'일관 Press',w:'INNER WALL Press'};
 const gMon=g=>F[GN[g]].mon;
@@ -546,7 +521,7 @@ function pInfo(){
     ['무세정','세정(SC1) 실적이 없는 코드의 양품 비중입니다. ' + LY + '년에 도입돼 올해만 있고, 범용(60톤 제외)은 6월부터 집계합니다.'],
     ['동기 비교','연도 비교는 모두 같은 달(1~'+LM+'월) 기준입니다. 연도별 요약 표의 이전 연도는 연간 값이라 동기 비교 표를 함께 제공합니다.'],
     ['제품군','일관은 Press auto charge 전체입니다. REAR만 있는 3개 코드(REAR 미지정)는 기타에 포함합니다.'],
-    ['다 cavity 효과','평균 cavity = 양품 EA ÷ Stroke 수, SPM(EA) = SPM(Stroke) × 평균 cavity입니다. 전년 동기 SPM(EA) 증감을 Stroke 속도 효과와 다 cavity(평균 cavity 상승) 효과로 나누고, 전체는 제품군 가동시간 비중 변화(제품 믹스)를 따로 표시합니다. 가동시간 절감은 올해 생산량을 전년 동기 평균 cavity로 만들었다면 더 걸렸을 시간으로, 제품군별 합계의 추정치입니다.'],
+    ['다 cavity 효과','평균 cavity = 양품 EA ÷ Stroke 수, SPM(EA) = SPM(Stroke) × 평균 cavity입니다. 월간 요약의 ‘다 cavity 효과’는 전년 동기 대비 SPM(EA) 증가(%) 중 평균 cavity 상승으로 설명되는 몫(%p)이며, 나머지는 Stroke 속도 변화와 (전체의) 제품 믹스 변화입니다.'],
     ['자료 출처','일관 · INNER WALL Press 캐비티별 생산비율 및 SPM 분석 (자료 활용) 엑셀, 법인 Press 품목구분별 월별 SPM 분석 데이터.']];
   return pageHead('공통','집계 기준','대시보드 수치의 산출 방식과 자료 출처입니다.')+`<div class="basis">${B.map(([h,p])=>`<div><h4>${h}</h4><p>${p}</p></div>`).join('')}</div>`;
 }
