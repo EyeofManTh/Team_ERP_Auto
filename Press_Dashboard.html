@@ -156,6 +156,9 @@ table.x th small{font-weight:500;color:var(--tx3);font-size:12px}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .side,.mtop,.back,.seg,#tip{display:none!important}
   .app{display:block}.xl-w.tall{max-height:none}.xl,.card{break-inside:avoid}.main{padding:0}
+  /* 월간 요약: 1쪽 = 표, 2쪽 = 그래프 3개 한 줄 */
+  .grid3{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important;break-before:page;break-inside:avoid}
+  .grid3 .card{padding:12px 10px}
 }
 </style>
 </head>
