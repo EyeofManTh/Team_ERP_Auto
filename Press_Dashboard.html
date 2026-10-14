@@ -578,7 +578,10 @@ $('#btnPrint').addEventListener('click',()=>{try{window.print();}catch(e){}});
 $('#asof').textContent=`${LY}.${String(LM).padStart(2,'0')}`;
 buildNav();computeKeys();route();
 let lastW=0;new ResizeObserver(()=>{const w=$('.main').clientWidth;if(Math.abs(w-lastW)<2)return;lastW=w;render(true);}).observe($('.main'));
-window.addEventListener('beforeprint',()=>render(true));
+/* PDF 저장·인쇄는 어느 메뉴에서 눌러도 '월간 요약' 장표(전체) 1장만 출력 */
+let printSaved=null;
+window.addEventListener('beforeprint',()=>{if(cur!=='sum'){printSaved={cur,cat:UI.cat};cur='sum';UI.cat=ALL;}render(true);});
+window.addEventListener('afterprint',()=>{if(printSaved){cur=printSaved.cur;UI.cat=printSaved.cat;printSaved=null;render(true);}});
 </script>
 </body>
 </html>
