@@ -328,7 +328,7 @@ function stackCols(host,{cols,max,tipFn,topLabel,height}){host.textContent='';
 /* ── excel-style table helpers ── */
 const c_=(t,cls,st)=>`<td${cls?` class="${cls}"`:''}${st?` style="${st}"`:''}>${t}</td>`;
 const bar=(v,max)=>`background-image:linear-gradient(90deg,rgba(42,120,214,.20) ${Math.max(0,Math.min(100,v/max*100)).toFixed(1)}%,transparent ${Math.max(0,Math.min(100,v/max*100)).toFixed(1)}%)`;
-const dcell=(d,txt,good)=>d==null?'–':`<span class="dl ${Math.abs(d)<.05?'nt':good?'up':'dn'}">${Math.abs(d)<.05?'':d>0?'▲ ':'▼ '}${txt}</span>`;
+const dcell=(d,txt,good)=>d==null?'–':`<span class="dl ${Math.abs(d)<.05||good==='n'?'nt':(good===true?d>0:good)?'up':'dn'}">${Math.abs(d)<.05?'':d>0?'▲ ':'▼ '}${txt}</span>`;
 function xl({title,sub,ctl,head,rows,cls='',tall=false,note,foot}){
   return`<div class="xl"><div class="xl-h"><div><h3>${title}</h3>${sub?`<div class="xl-s">${sub}</div>`:''}</div>${ctl?`<div class="ctl">${ctl}</div>`:''}</div>
   <div class="xl-w${tall?' tall':''}"><table class="x ${cls}"><thead>${head}</thead><tbody>${rows}</tbody></table></div>${note?`<div class="xl-n">${note}</div>`:''}</div>`;}
@@ -481,7 +481,7 @@ function pGYr(g){
   // same-period table
   const h2=`<tr>${th('기간')}${th('양품수량 (EA)')}${th('가동시간 (분)')}${th('다 cavity 비중')}${th('가동속도(SPM) (Stroke/분)')}${th('가동속도(SPM) (EA/분)')}</tr>`;
   let r2=k.cm.map(p=>`<tr>${c_(`${p.y} 1~${LM}월`,'k')}${c_(fI(p.q))}${c_(fI(p.t))}${c_(fmt(p.multi)+'%')}${c_(fmt(p.spmS))}${c_(fmt(p.spmE))}</tr>`).join('');
-  r2+=`<tr class="tot">${c_('전년 대비','k')}${c_(dcell(yoy(k.a.q,k.b.q),sgn(yoy(k.a.q,k.b.q)),true))}${c_(dcell(yoy(k.a.t,k.b.t),sgn(yoy(k.a.t,k.b.t)),true))}${c_(dcell(k.dM,sgn(k.dM,1,'%p'),true))}${c_(dcell(k.dS,sgn(k.dS),k.dS>0))}${c_(dcell(k.dE,sgn(k.dE),k.dE>0))}</tr>`;
+  r2+=`<tr class="tot">${c_('전년 대비','k')}${c_(dcell(yoy(k.a.q,k.b.q),sgn(yoy(k.a.q,k.b.q)),'n'))}${c_(dcell(yoy(k.a.t,k.b.t),sgn(yoy(k.a.t,k.b.t)),'n'))}${c_(dcell(k.dM,sgn(k.dM,1,'%p'),true))}${c_(dcell(k.dS,sgn(k.dS),k.dS>0))}${c_(dcell(k.dE,sgn(k.dE),k.dE>0))}</tr>`;
   return pageHead(GL[g]+' 분석','연도별 캐비티 요약',sub,chips)+
     xl({title:esc(X.title_yc),sub:`${LY}년은 1~${LM}월 누계, 이전 연도는 연간입니다`,head,rows,note:esc(X.note_yc)})+
     xl({title:`▣ 동기 비교 (1~${LM}월)`,sub:'같은 기간끼리 비교한 값입니다 · 월별 시트로 재계산',head:h2,rows:r2,note:'가동속도(SPM·Stroke)는 가동시간 가중평균, 가동속도(SPM·EA) = 양품 EA ÷ 가동시간(분)입니다.'})+
