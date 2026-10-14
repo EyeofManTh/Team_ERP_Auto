@@ -360,7 +360,7 @@ function pSum(){
   const lg=legendHTML([{name:String(PY),color:yc(PY)},{name:String(LY),color:yc(LY)}]);
   const dE=K.by[c].dEa,dC=dpp(K.by[c].cav,K.by[c].cavP),mr=muse(1,LM,c).ratio;
   return pageHead('Press 종합 현황','월간 Press 생산성 요약',sub)+
-    xl({title:'▣ 제품군별 분당 생산능력 향상',sub:`${LY}.01–${mm} 누계 vs ${PY} 동기 · 행을 클릭하면 아래 그래프가 바뀝니다`,head,rows,cls:'cmp',note:`증감: ▲ 초록 = 개선, ▼ 빨강 = 하락. 다 cavity 효과 = 분당 생산능력(EA) 증가 중 다 cavity 적용으로 늘어난 몫(%p). 무세정은 ${LY}년 도입분이라 전년 비교가 없습니다.`})+
+    xl({title:'▣ 제품군별 분당 생산능력 향상',sub:`${LY}.01–${mm} 누계 vs ${PY} 동기 · 행을 클릭하면 아래 그래프가 바뀝니다`,head,rows,cls:'cmp',note:`증감: ▲ 초록 = 개선, ▼ 빨강 = 하락. 다 cavity 효과 = 분당 생산능력(EA) 증가 중 다 cavity 적용으로 늘어난 몫(%p). 무세정은 ${LY}년 도입분이라 전년 비교가 없습니다.<br><b>※ 기타 다 cavity 비중 하락(26.6% → 16.5%)은 품목 이동 영향입니다.</b> 2 cavity 품목 GH61-17737A(RING SUB PCB)가 기타(Press Charge)에서 ${PY}.01–${mm} 11.8M EA였으나 ${LY}년에는 Press auto charge(일관)로 옮겨가 기타 0.8M EA만 남았고 일관 24.1M EA로 집계됩니다. 이 품목을 제외하면 기타 다 cavity 비중은 11.6% → 15.2%로 오릅니다. (${LY}.01–09 기준)`})+
     `<div class="grid3">${chartCard('chE','분당 생산능력 (가동속도(SPM) EA/분)',`${n} · ${PY} 동기 대비 ${sgn(dE)}`,lg)}${chartCard('chV','다 cavity 비중',`${n} · ${PY} 동기 대비 ${sgn(dC,1,'%p')}`,lg)}${chartCard('chM','무세정 점유율',`${n} · ${LY}년 누계 ${mr==null?'–':fmt(mr)+'%'}`,'')}</div>`;
 }
 function dSum(){
