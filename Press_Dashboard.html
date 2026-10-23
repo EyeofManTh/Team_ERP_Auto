@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>성우비나 Press 월간 생산성 보고</title>
+<title>성우비나 Press 생산성 보고 · 2027년 예상</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
@@ -683,13 +683,13 @@ const IC={
   list:'<path d="M5 6h14M5 12h14M5 18h9"/>',
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>'};
 const NAV=[
-  {g:'Press 종합 현황',items:[['sum','월간 요약','grid',pSum,dSum],['spm','가동속도(SPM) · ST','gauge',pSpm,dSpm],['muse','무세정','drop',pMuse,dMuse],['cav','Cavity 비율','layers',pCav,dCav]]},
   {g:'2027년 사업 계획',items:[['y27','2027년 예상','trend',pY27,dY27]]},
+  {g:'Press 종합 현황',items:[['sum','월간 요약','grid',pSum,dSum],['spm','가동속도(SPM) · ST','gauge',pSpm,dSpm],['muse','무세정','drop',pMuse,dMuse],['cav','Cavity 비율','layers',pCav,dCav]]},
   {g:'일관 Press 분석',items:[['i-yr','연도별 요약','cal',()=>pGYr('i'),()=>dGYr('i')],['i-mo','월별 추이','trend',()=>pGMon('i'),()=>dGMon('i')]]},
   {g:'INNER WALL 분석',items:[['w-yr','연도별 요약','cal',()=>pGYr('w'),()=>dGYr('w')],['w-mo','월별 추이','trend',()=>pGMon('w'),()=>dGMon('w')]]}];
 const PAGES={};NAV.forEach(g=>g.items.forEach(([id,t,ic,p,d])=>PAGES[id]={p,d}));PAGES.info={p:pInfo,d:()=>{}};
 function buildNav(){$('#nav').innerHTML=NAV.map(g=>`<div class="ng">${g.g}</div>`+g.items.map(([id,t,ic])=>`<a class="nv" href="#${id}" data-v="${id}"><svg viewBox="0 0 24 24">${IC[ic]}</svg>${t}</a>`).join('')).join('')+`<div class="ng">공통</div><a class="nv" href="#info" data-v="info"><svg viewBox="0 0 24 24">${IC.info}</svg>집계 기준</a>`;}
-let cur='sum';
+let cur='y27';
 function render(keepScroll){const pg=PAGES[cur]||PAGES.sum;const y=window.scrollY;hideTip();$('#page').innerHTML=pg.p();bind();try{pg.d();}catch(e){console.error(e);}if(keepScroll)window.scrollTo(0,y);}
 function bind(){
   const P=$('#page');
@@ -698,7 +698,7 @@ function bind(){
   seg('segMetric','metric');seg('segSpmYear','spmYear',1);seg('segSpmMode','spmMode');seg('segMuseMode','museMode');seg('segCavYear','cavYear',1);seg('segCavMode','cavMode');seg('segGMonYear','gMonYear');
   P.querySelectorAll('#segGMonYear button').forEach(b=>b.addEventListener('click',()=>{UI.gMonYear=b.dataset.v==='all'?'all':+b.dataset.v;render(true);},{once:false}));
 }
-function route(){const id=(location.hash||'#sum').slice(1);cur=PAGES[id]?id:'sum';
+function route(){const id=(location.hash||'#y27').slice(1);cur=PAGES[id]?id:'y27';
   document.querySelectorAll('.nv').forEach(a=>{if(a.dataset.v===cur)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
   closeMenu();window.scrollTo(0,0);render(false);}
 function closeMenu(){$('#side').classList.remove('open');$('#back').classList.remove('on');}
